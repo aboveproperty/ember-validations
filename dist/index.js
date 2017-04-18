@@ -74,9 +74,9 @@ Ember.Validations.Errors = Ember.Object.extend({
 
 (function() {
 var setValidityMixin = Ember.Mixin.create({
-  isValid: function() {
+  isValid: Ember.computed('validators.@each.isValid', function() {
     return this.get('validators').compact().filterBy('isValid', false).get('length') === 0;
-  }.property('validators.@each.isValid'),
+  }),
   isInvalid: Ember.computed.not('isValid')
 });
 
@@ -100,10 +100,10 @@ var ArrayValidatorProxy = Ember.ArrayProxy.extend(setValidityMixin, {
   validate: function() {
     return this._validate();
   },
-  _validate: function() {
+  _validate: Ember.on('init', function() {
     var promises = this.get('content').invoke('_validate').without(undefined);
     return Ember.RSVP.all(promises);
-  }.on('init'),
+  }),
   validators: Ember.computed.alias('content')
 });
 
@@ -165,10 +165,10 @@ Ember.Validations.Mixin = Ember.Mixin.create(setValidityMixin, {
       return errors;
     });
   },
-  _validate: function() {
+  _validate: Ember.on('init', function() {
     var promises = this.validators.invoke('_validate').without(undefined);
     return Ember.RSVP.all(promises);
-  }.on('init')
+  })
 });
 
 })();
@@ -205,18 +205,18 @@ Ember.Validations.validators.Base = Ember.Object.extend({
     };
     this.model.addObserver(this.property, this, this._validate);
   },
-  addObserversForDependentValidationKeys: function() {
+  addObserversForDependentValidationKeys: Ember.on('init', function() {
     this._dependentValidationKeys.forEach(function(key) {
       this.model.addObserver(key, this, this._validate);
     }, this);
-  }.on('init'),
-  pushDependentValidationKeyToModel: function() {
+  }),
+  pushDependentValidationKeyToModel: Ember.on('init', function() {
     var model = this.get('model');
     if (model._dependentValidationKeys[this.property] === undefined) {
       model._dependentValidationKeys[this.property] = Ember.makeArray();
     }
     model._dependentValidationKeys[this.property].addObjects(this._dependentValidationKeys);
-  }.on('init'),
+  }),
   call: function () {
     throw 'Not implemented!';
   },
@@ -239,7 +239,7 @@ Ember.Validations.validators.Base = Ember.Object.extend({
       }
     });
   },
-  _validate: function() {
+  _validate: Ember.on('init', function() {
     this.errors.clear();
     if (this.canValidate()) {
       this.call();
@@ -249,7 +249,7 @@ Ember.Validations.validators.Base = Ember.Object.extend({
     } else {
       return Ember.RSVP.resolve(false);
     }
-  }.on('init'),
+  }),
   canValidate: function() {
     if (typeof(this.conditionals) === 'object') {
       if (this.conditionals['if']) {

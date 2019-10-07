@@ -110,24 +110,41 @@ var ArrayValidatorProxy = Ember.ArrayProxy.extend(setValidityMixin, {
 Ember.Validations.Mixin = Ember.Mixin.create(setValidityMixin, {
   init: function() {
     this._super();
-    this.errors = Ember.Validations.Errors.create();
+
+    this.set('errors', Ember.Validations.Errors.create());
+
     this._dependentValidationKeys = {};
     this.validators = Ember.makeArray();
     if (this.get('validations') === undefined) {
       this.validations = {};
     }
+
     this.buildValidators();
-    this.validators.forEach(function(validator) {
-      validator.addObserver('errors.[]', this, function(sender, key, value, context, rev) {
-        var errors = Ember.makeArray();
-        this.validators.forEach(function(validator) {
+
+    this.validators.forEach((validator) => {
+      let names = validator.property.split('.');
+      let objectPointer = this.get('errors');
+      for (let i = 0; i < names.length; i++) {
+        let newObjectPointer = objectPointer[names[i]];
+        if (newObjectPointer === undefined) {
+          newObjectPointer = Ember.makeArray();
+          Ember.set(objectPointer, names[i], newObjectPointer);
+        }
+        objectPointer = newObjectPointer;
+      }
+
+      validator.addObserver('errors.[]', this, function(sender) {
+        let errors = Ember.makeArray();
+
+        this.validators.forEach((validator) => {
           if (validator.property === sender.property) {
-            errors = errors.concat(validator.errors);
+            errors.addObjects(validator.errors);
           }
-        }, this);
-        this.set('errors.' + sender.property, errors);
+        });
+
+        Ember.set(this, `errors.${sender.property}`, errors);
       });
-    }, this);
+    });
   },
   buildValidators: function() {
     var property, validator;
@@ -165,10 +182,10 @@ Ember.Validations.Mixin = Ember.Mixin.create(setValidityMixin, {
       return errors;
     });
   },
-  _validate: Ember.on('init', function() {
+  _validate: function() {
     var promises = this.validators.invoke('_validate').without(undefined);
     return Ember.RSVP.all(promises);
-  })
+  }
 });
 
 })();

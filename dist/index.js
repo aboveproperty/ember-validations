@@ -142,7 +142,7 @@ Ember.Validations.Mixin = Ember.Mixin.create(setValidityMixin, {
           }
         });
 
-        Ember.set(this, `errors.${sender.property}`, errors);
+        Ember.set(this, "errors." + sender.property, errors);
       });
     });
   },

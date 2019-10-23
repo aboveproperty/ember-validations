@@ -122,10 +122,10 @@ Ember.Validations.Mixin = Ember.Mixin.create(setValidityMixin, {
     this.buildValidators();
 
     this.validators.forEach((validator) => {
-      let names = validator.property.split('.');
-      let objectPointer = this.get('errors');
-      for (let i = 0; i < names.length; i++) {
-        let newObjectPointer = objectPointer[names[i]];
+      var names = validator.property.split('.');
+      var objectPointer = this.get('errors');
+      for (var i = 0; i < names.length; i++) {
+        var newObjectPointer = objectPointer[names[i]];
         if (newObjectPointer === undefined) {
           newObjectPointer = Ember.makeArray();
           Ember.set(objectPointer, names[i], newObjectPointer);
@@ -134,7 +134,7 @@ Ember.Validations.Mixin = Ember.Mixin.create(setValidityMixin, {
       }
 
       validator.addObserver('errors.[]', this, function(sender) {
-        let errors = Ember.makeArray();
+        var errors = Ember.makeArray();
 
         this.validators.forEach((validator) => {
           if (validator.property === sender.property) {

@@ -121,7 +121,7 @@ Ember.Validations.Mixin = Ember.Mixin.create(setValidityMixin, {
 
     this.buildValidators();
 
-    this.validators.forEach((validator) => {
+    this.validators.forEach(function (validator) {
       var names = validator.property.split('.');
       var objectPointer = this.get('errors');
       for (var i = 0; i < names.length; i++) {
@@ -136,7 +136,7 @@ Ember.Validations.Mixin = Ember.Mixin.create(setValidityMixin, {
       validator.addObserver('errors.[]', this, function(sender) {
         var errors = Ember.makeArray();
 
-        this.validators.forEach((validator) => {
+        this.validators.forEach(function(validator) {
           if (validator.property === sender.property) {
             errors.addObjects(validator.errors);
           }

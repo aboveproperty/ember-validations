@@ -63,8 +63,11 @@ Ember.Validations.messages = {
 (function() {
 Ember.Validations.Errors = Ember.Object.extend({
   unknownProperty: function(property) {
-    this.set(property, Ember.makeArray());
-    return this.get(property);
+    var newValue = Ember.makeArray();
+    Ember.run.once(this, function() {
+      this.set(property, newValue);
+    });
+    return newValue;
   }
 });
 

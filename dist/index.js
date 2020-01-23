@@ -183,7 +183,7 @@ Ember.Validations.Mixin = Ember.Mixin.create(setValidityMixin, {
     var self = this;
     return this._validate().then(function(vals) {
       var errors = self.get('errors');
-      if (vals.contains(false)) {
+      if (vals.includes(false)) {
         return Ember.RSVP.reject(errors);
       }
       return errors;
